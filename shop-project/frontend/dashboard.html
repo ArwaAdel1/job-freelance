@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div class="login-page" id="loginPage" style="display:none">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">🔐</div>
+      <div class="login-title">لوحة التحكم</div>
+      <div class="login-subtitle">سجّل دخولك للمتابعة</div>
+    </div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label">اسم المستخدم</label>
+        <input id="loginUser" class="form-input" type="text" placeholder="admin" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور</label>
+        <input id="loginPass" class="form-input" type="password" placeholder="••••••••" required>
+      </div>
+      <button id="loginBtn" type="submit" class="btn btn-gold" style="width:100%;justify-content:center;margin-top:8px">
+        دخول →
+      </button>
+    </form>
+    <div style="text-align:center;margin-top:20px">
+      <a href="/" style="color:var(--text-muted);font-size:0.85rem">← العودة للمتجر</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD APP ===== -->
+<div class="dash-layout" id="dashApp" style="display:none">
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-text">🛒 لوحة التحكم</div>
+      <div class="sidebar-logo-sub">إدارة المتجر</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">الرئيسية</div>
+      <div class="nav-item active" data-page="overview" onclick="navigate('overview')">
+        <span class="nav-icon">📊</span> نظرة عامة
+      </div>
+
+      <div class="nav-group-label">المحتوى</div>
+      <div class="nav-item" data-page="products" onclick="navigate('products')">
+        <span class="nav-icon">📦</span> المنتجات
+      </div>
+      <div class="nav-item" data-page="categories" onclick="navigate('categories')">
+        <span class="nav-icon">🗂️</span> الأقسام
+      </div>
+      <div class="nav-item" data-page="orders" onclick="navigate('orders')">
+        <span class="nav-icon">📋</span> الطلبات
+        <span class="nav-badge" id="newOrdersBadge" style="display:none">0</span>
+      </div>
+
+      <div class="nav-group-label">الإعدادات</div>
+      <div class="nav-item" data-page="settings" onclick="navigate('settings')">
+        <span class="nav-icon">⚙️</span> إعدادات الموقع
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-info">
+        <div class="admin-avatar" id="adminAvatar">A</div>
+        <div>
+          <div class="admin-name" id="adminName">Admin</div>
+          <div class="admin-role">مدير النظام</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <span>🚪</span> تسجيل الخروج
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+    <!-- Topbar -->
+    <div class="dash-topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="topbar-title" id="pageTitle">لوحة التحكم</div>
+      </div>
+      <div class="topbar-actions">
+        <a href="/" target="_blank" class="btn btn-outline" style="padding:8px 16px;font-size:0.85rem">
+          🌐 عرض المتجر
+        </a>
+      </div>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- ===== OVERVIEW PAGE ===== -->
+      <div class="dash-page active" id="page-overview">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(249,168,212,0.1);color:var(--accent-gold)">📦</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value" id="statProducts">—</div>
+              <div class="stat-card-label">إجمالي المنتجات</div>
+              <div class="stat-card-change neutral">في المتجر</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(46,204,113,0.1);color:var(--success)">✅</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value" id="statActive">—</div>
+              <div class="stat-card-label">المنتجات النشطة</div>
+              <div class="stat-card-change up">ظاهرة للزوار</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(45,107,228,0.1);color:var(--accent-blue-light)">🗂️</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value" id="statCategories">—</div>
+              <div class="stat-card-label">الأقسام</div>
+              <div class="stat-card-change neutral">قسم رئيسي</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(124,58,237,0.1);color:#a78bfa">💳</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value">4</div>
+              <div class="stat-card-label">طرق الدفع</div>
+              <div class="stat-card-change up">متاحة</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="charts-row">
+          <!-- Sales Chart -->
+          <div class="card" style="padding:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+              <div style="font-weight:800;font-size:1.05rem">📈 المبيعات الشهرية</div>
+              <div style="display:flex;gap:8px">
+                <button class="filter-btn active" id="chartBtn6" onclick="switchChart(6,this)">6 أشهر</button>
+                <button class="filter-btn" id="chartBtn12" onclick="switchChart(12,this)">12 شهر</button>
+              </div>
+            </div>
+            <canvas id="salesChart" height="100"></canvas>
+          </div>
+          <!-- Top Products -->
+          <div class="card" style="padding:24px">
+            <div style="font-weight:800;font-size:1.05rem;margin-bottom:16px">🏆 أكتر منتجات مطلوبة</div>
+            <div id="topProductsList">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="bottom-row">
+          <div class="card" style="padding:24px">
+            <div style="font-weight:800;margin-bottom:16px;font-size:1.05rem">⚡ إجراءات سريعة</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-gold" onclick="openProductModal()" style="justify-content:center">➕ إضافة منتج جديد</button>
+              <button class="btn btn-outline" onclick="navigate('orders')" style="justify-content:center">📋 إدارة الطلبات</button>
+              <button class="btn btn-outline" onclick="navigate('settings')" style="justify-content:center">⚙️ إعدادات الموقع</button>
+            </div>
+          </div>
+          <div class="card" style="padding:24px">
+            <div style="font-weight:800;margin-bottom:16px;font-size:1.05rem">📧 الإشعارات</div>
+            <div style="color:var(--text-secondary);font-size:0.9rem;line-height:2">
+              🔹 هتوصلك إيميل لكل طلب جديد<br>
+              🔹 فيه تفاصيل الطلب والمنتجات<br>
+              🔹 تأكد من إعداد EMAIL في ملف .env<br>
+            </div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+              <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:8px">آخر تحديث: <span id="lastUpdateTime">—</span></div>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;font-size:0.85rem;padding:8px" onclick="checkNewOrders()">
+                🔄 تحديث الطلبات الآن
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PRODUCTS PAGE ===== -->
+      <div class="dash-page" id="page-products">
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">📦 المنتجات</div>
+            <div class="table-controls" style="flex-wrap:wrap;gap:8px">
+              <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input class="search-input" id="productSearch" placeholder="ابحث بالاسم...">
+              </div>
+              <select class="form-input" id="productCatFilter" style="width:160px;padding:9px 12px" onchange="loadProducts(1)">
+                <option value="">كل الأقسام</option>
+              </select>
+              <button class="btn btn-gold" onclick="openProductModal()">➕ منتج جديد</button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>الصورة</th>
+                  <th>الاسم</th>
+                  <th>القسم</th>
+                  <th>السعر</th>
+                  <th>المخزون</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="productsTable">
+                <tr><td colspan="7"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-pagination" id="productsPagination"></div>
+        </div>
+      </div>
+
+      <!-- ===== CATEGORIES PAGE ===== -->
+      <div class="dash-page" id="page-categories">
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">🗂️ الأقسام</div>
+            <button class="btn btn-gold" onclick="openCategoryModal()">➕ قسم جديد</button>
+          </div>
+          <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>الأيقونة</th>
+            <th>القسم</th>
+            <th>الوصف</th>
+            <th>الأقسام الفرعية</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="categoriesTable">
+          <tr><td colspan="5"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS PAGE ===== -->
+      <div class="dash-page" id="page-settings">
+        <div class="settings-grid">
+
+          <!-- Site Info -->
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon" style="background:rgba(249,168,212,0.1);color:var(--accent-gold)">🏪</div>
+              <div class="settings-section-title">بيانات المتجر</div>
+            </div>
+            <div class="settings-section-body">
+              <div class="form-group">
+                <label class="form-label">اسم المتجر</label>
+                <input id="sSiteName" class="form-input" placeholder="متجرنا">
+              </div>
+              <div class="form-group">
+                <label class="form-label">عنوان الهيرو</label>
+                <input id="sHeroTitle" class="form-input" placeholder="تسوّق بثقة">
+              </div>
+              <div class="form-group">
+                <label class="form-label">وصف الهيرو</label>
+                <input id="sHeroSubtitle" class="form-input" placeholder="وصف قصير للمتجر">
+              </div>
+              <div class="form-group">
+                <label class="form-label">من نحن</label>
+                <textarea id="sAbout" class="form-input" placeholder="نبذة عن المتجر"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact -->
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon" style="background:rgba(45,107,228,0.1);color:var(--accent-blue-light)">📞</div>
+              <div class="settings-section-title">بيانات التواصل</div>
+            </div>
+            <div class="settings-section-body">
+              <div class="form-group">
+                <label class="form-label">رقم الهاتف</label>
+                <input id="sPhone" class="form-input" placeholder="01000000000" dir="ltr">
+              </div>
+              <div class="form-group">
+                <label class="form-label">واتساب (مع كود الدولة بدون +)</label>
+                <input id="sWhatsapp" class="form-input" placeholder="201000000000" dir="ltr">
+              </div>
+              <div class="form-group">
+                <label class="form-label">البريد الإلكتروني</label>
+                <input id="sEmail" class="form-input" type="email" placeholder="info@store.com" dir="ltr">
+              </div>
+              <div class="form-group">
+                <label class="form-label">العنوان</label>
+                <input id="sAddress" class="form-input" placeholder="القاهرة، مصر">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">فيسبوك</label>
+                  <input id="sFacebook" class="form-input" placeholder="https://facebook.com/..." dir="ltr">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">إنستغرام</label>
+                  <input id="sInstagram" class="form-input" placeholder="https://instagram.com/..." dir="ltr">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">تيك توك</label>
+                <input id="sTiktok" class="form-input" placeholder="https://tiktok.com/@..." dir="ltr">
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Password -->
+          <div class="settings-section" style="grid-column:1/-1">
+            <div class="settings-section-header">
+              <div class="settings-section-icon" style="background:rgba(231,76,60,0.1);color:var(--danger)">🔑</div>
+              <div class="settings-section-title">تغيير كلمة المرور</div>
+            </div>
+            <div class="settings-section-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+                <div class="form-group">
+                  <label class="form-label">كلمة المرور الحالية</label>
+                  <div style="position:relative">
+                    <input id="sCurrentPassword" class="form-input" type="password" placeholder="••••••••" style="padding-left:36px">
+                    <button type="button" class="password-toggle" onclick="togglePassword('sCurrentPassword',this)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:0.85rem;color:var(--text-muted);padding:4px">👁️</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">كلمة المرور الجديدة</label>
+                  <div style="position:relative">
+                    <input id="sNewPassword" class="form-input" type="password" placeholder="••••••••" style="padding-left:36px">
+                    <button type="button" class="password-toggle" onclick="togglePassword('sNewPassword',this)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:0.85rem;color:var(--text-muted);padding:4px">👁️</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">تأكيد كلمة المرور الجديدة</label>
+                  <div style="position:relative">
+                    <input id="sConfirmPassword" class="form-input" type="password" placeholder="••••••••" style="padding-left:36px">
+                    <button type="button" class="password-toggle" onclick="togglePassword('sConfirmPassword',this)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:0.85rem;color:var(--text-muted);padding:4px">👁️</button>
+                  </div>
+                </div>
+              </div>
+              <button id="changePasswordBtn" class="btn btn-gold" onclick="changePassword()">
+                🔑 تغيير كلمة المرور
+              </button>
+            </div>
+          </div>
+
+          <!-- Payment -->
+          <div class="settings-section" style="grid-column:1/-1">
+            <div class="settings-section-header">
+              <div class="settings-section-icon" style="background:rgba(46,204,113,0.1);color:var(--success)">💳</div>
+              <div class="settings-section-title">طرق الدفع</div>
+            </div>
+            <div class="settings-section-body">
+              <div style="margin-bottom:16px;font-size:0.85rem;color:var(--text-secondary)">
+                عدّل بيانات طرق الدفع. كل التعديلات تظهر فوراً في واجهة المتجر بعد الحفظ.
+              </div>
+              <div id="paymentMethodsList"></div>
+
+              <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+                <button id="saveSettingsBtn" class="btn btn-gold" onclick="saveSettings()">
+                  💾 حفظ الإعدادات
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ===== ORDERS PAGE ===== -->
+      <div class="dash-page" id="page-orders">
+        <!-- Stats Row -->
+        <div class="stats-grid" id="orderStatsGrid">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(231,76,60,0.1);color:var(--danger)">🆕</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value" id="oStatNew">—</div>
+              <div class="stat-card-label">طلبات جديدة</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(46,204,113,0.1);color:var(--success)">✅</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value" id="oStatPaid">—</div>
+              <div class="stat-card-label">تم الدفع</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(45,107,228,0.1);color:var(--accent-blue-light)">🚚</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value" id="oStatShipped">—</div>
+              <div class="stat-card-label">تم الشحن</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(249,168,212,0.1);color:var(--accent-gold)">💰</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value" id="oStatRevenue">—</div>
+              <div class="stat-card-label">إجمالي الإيرادات</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">📋 الطلبات</div>
+            <div class="table-controls">
+              <select class="form-input" id="orderStatusFilter" style="width:160px;padding:9px 12px" onchange="loadOrders(1)">
+                <option value="">كل الطلبات</option>
+                <option value="جديد">🆕 جديد</option>
+                <option value="تم الدفع">✅ تم الدفع</option>
+                <option value="تم الشحن">🚚 تم الشحن</option>
+                <option value="مكتمل">🎉 مكتمل</option>
+                <option value="ملغي">❌ ملغي</option>
+              </select>
+              <button class="btn btn-outline" onclick="loadOrders(1);loadOrderStats()">🔄 تحديث</button>
+              <button class="btn btn-outline" onclick="exportOrdersExcel()" style="color:var(--success);border-color:rgba(46,204,113,0.3)">📥 تصدير Excel</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th>
+                  <th>العميل</th>
+                  <th>المنتجات</th>
+                  <th>الإجمالي</th>
+                  <th>طريقة الدفع</th>
+                  <th>التاريخ</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTable">
+                <tr><td colspan="7"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-pagination" id="ordersPagination"></div>
+        </div>
+      </div>
+
+    </div><!-- /dash-content -->
+  </main>
+</div><!-- /dash-layout -->
+
+<!-- ===== PRODUCT MODAL ===== -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="productModalTitle">إضافة منتج</div>
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="productForm" onsubmit="return false">
+        <div class="form-group">
+          <label class="form-label">الاسم *</label>
+          <input id="pNameAr" class="form-input" placeholder="اسم المنتج" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">الوصف</label>
+          <textarea id="pDescAr" class="form-input" placeholder="وصف المنتج..." rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">القسم الرئيسي *</label>
+          <select id="productCategory" class="form-input" required onchange="onProductCategoryChange()">
+            <option value="">اختر القسم الرئيسي</option>
+          </select>
+        </div>
+        <div class="form-group" id="productSubcategoryGroup" style="display:none">
+          <label class="form-label">القسم الفرعي (اختياري)</label>
+          <select id="productSubcategory" class="form-input">
+            <option value="">— بدون قسم فرعي —</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">السعر (جنيه) *</label>
+            <input id="pPrice" class="form-input" type="number" min="0" placeholder="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">السعر القديم (اختياري)</label>
+            <input id="pOldPrice" class="form-input" type="number" min="0" placeholder="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">الكمية في المخزون</label>
+          <input id="pStock" class="form-input" type="number" min="0" placeholder="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">صور المنتج</label>
+          <div class="image-upload-area" id="imageUploadArea">
+            <div class="upload-icon">📸</div>
+            <p>اسحب الصور هنا أو اضغط للاختيار</p>
+            <span>JPG, PNG, WebP - حد أقصى 5MB للصورة</span>
+          </div>
+          <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
+          <div class="image-previews" id="imagePreviews"></div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:24px;padding:16px;background:var(--bg-secondary);border-radius:var(--radius-sm)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pActive" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            نشط (ظاهر للزوار)
+          </label>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end">
+          <button type="button" class="btn btn-outline" onclick="closeProductModal()">إلغاء</button>
+          <button id="saveProductBtn" type="button" class="btn btn-gold" onclick="saveProduct()">💾 حفظ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CATEGORY MODAL ===== -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="categoryModalTitle">إضافة قسم</div>
+      <button class="modal-close" onclick="closeCategoryModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">الاسم *</label>
+        <input id="catNameAr" class="form-input" placeholder="الإلكترونيات" required oninput="autoGenerateSlug()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الوصف (اختياري)</label>
+        <textarea id="catDescAr" class="form-input" placeholder="وصف القسم..." rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الأيقونة</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="btn btn-outline" style="cursor:pointer;margin:0">
+            📁 رفع <input type="file" id="catIconFile" accept="image/*" style="display:none" onchange="uploadCategoryIcon(this)">
+          </label>
+          <span style="color:var(--text-muted);font-size:0.82rem">أو</span>
+          <input id="catIconUrl" class="form-input" placeholder="رابط الأيقونة..." style="flex:1;min-width:180px">
+          <button type="button" class="action-btn delete" id="catIconRemoveBtn" style="display:none" onclick="removeCategoryIcon()" title="إزالة الأيقونة">✕</button>
+        </div>
+        <div id="catIconPreview" style="margin-top:6px;display:none">
+          <img src="" alt="icon" style="width:32px;height:32px;object-fit:contain;border-radius:6px;border:1px solid var(--border-color)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">القسم الرئيسي (اختياري للقسم الفرعي)</label>
+        <select id="catParent" class="form-input">
+          <option value="">— قسم رئيسي —</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeCategoryModal()">إلغاء</button>
+        <button id="saveCategoryBtn" type="button" class="btn btn-gold" onclick="saveCategory()">💾 حفظ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Close modals on overlay click -->
+<script>
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+  });
+</script>
+
+<!-- ===== ORDER DETAIL MODAL ===== -->
+<div class="modal-overlay" id="orderDetailModal">
+  <div class="modal order-detail-modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title">📋 تفاصيل الطلب</div>
+      <button class="modal-close" onclick="closeOrderDetails()">✕</button>
+    </div>
+    <div class="modal-body" id="orderDetailContent">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

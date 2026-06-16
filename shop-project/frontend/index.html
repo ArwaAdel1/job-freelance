@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متجرنا</title>
+  <link rel="stylesheet" href="css/main.css?v=2">
+  <link rel="stylesheet" href="css/home.css?v=2">
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/" class="navbar-logo">🛒 <span class="site-name">متجرنا</span></a>
+
+    <div class="navbar-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="navSearch" placeholder="ابحث عن منتج...">
+    </div>
+
+    <div class="navbar-links">
+      <a href="#categories">الأقسام</a>
+      <a href="#products">المنتجات</a>
+      <a href="#payment">الدفع</a>
+      <a href="#contact">تواصل</a>
+      <a href="#" class="whatsapp-btn" target="_blank">💬 واتساب</a>
+    </div>
+    <!-- HAMBURGER (mobile) -->
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="navbar-hamburger" id="navHamburger" onclick="toggleMobileMenu()" aria-label="القائمة">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+
+<!-- MOBILE MENU PANEL -->
+<div class="mobile-menu-panel" id="mobileMenuPanel">
+  <div class="mobile-menu-header">
+    <span class="mobile-menu-logo">🛒 <span class="site-name">متجرنا</span></span>
+    <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+  </div>
+  <div class="mobile-menu-search">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="mobileSearch" placeholder="ابحث عن منتج..." oninput="document.getElementById('navSearch').value=this.value; document.getElementById('navSearch').dispatchEvent(new Event('input'))">
+  </div>
+  <div class="mobile-menu-links">
+    <a href="#categories" class="mobile-menu-link" onclick="closeMobileMenu()"><span class="link-icon">🗂️</span> الأقسام</a>
+    <a href="#products" class="mobile-menu-link" onclick="closeMobileMenu()"><span class="link-icon">🛍️</span> المنتجات</a>
+    <a href="#payment" class="mobile-menu-link" onclick="closeMobileMenu()"><span class="link-icon">💳</span> الدفع</a>
+    <a href="#contact" class="mobile-menu-link" onclick="closeMobileMenu()"><span class="link-icon">📞</span> تواصل</a>
+    <div class="mobile-menu-divider"></div>
+    <a href="#" class="mobile-menu-link wa whatsapp-btn" target="_blank">💬 واتساب</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- VIDEO BACKGROUND -->
+  <div class="hero-video-wrap">
+    <video autoplay muted loop playsinline poster="https://images.pexels.com/videos/7316981/adult-art-bag-beautiful-7316981.jpeg?auto=compress&cs=tinysrgb&h=627&fit=crop&w=1200">
+      <source src="./assets/hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero-video-overlay"></div>
+  </div>
+  <div class="hero-shimmer"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        ✨ <span>مرحباً بك في متجرنا</span>
+      </div>
+      <h1 class="hero-title" id="heroTitle">
+        تسوّق <span class="highlight">بثقة</span><br>واحصل على الأفضل
+      </h1>
+      <p class="hero-text" id="heroSubtitle">
+        أفضل المنتجات بأسعار منافسة — توصيل سريع، دفع آمن، وضمان الجودة
+      </p>
+      <div class="hero-actions">
+        <a href="#products" class="btn btn-gold">🛍️ تسوق الآن</a>
+        <a href="#" class="btn btn-outline whatsapp-btn" target="_blank">💬 تواصل معنا</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-number" id="heroStatProducts">+500</div>
+          <div class="stat-label">منتج متاح</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">4</div>
+          <div class="stat-label">طرق دفع</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">ضمان الجودة</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section" id="categories">
+  <div class="container">
+    <div>
+      <h2 class="section-title">تسوّق حسب القسم</h2>
+      <p class="section-subtitle">اختر من بين أقسامنا المتنوعة</p>
+    </div>
+    <div class="categories-grid" id="categoriesGrid">
+      <div class="spinner"></div>
+    </div>
+    <div id="subcategoriesBar" style="display:none;margin-top:16px;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="section" id="products" style="padding-top:0">
+  <div class="container">
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px">
+        <div>
+          <h2 class="section-title">منتجاتنا</h2>
+          <p class="section-subtitle">اكتشف أحدث المنتجات والعروض</p>
+        </div>
+        <button class="btn btn-outline" style="padding:8px 16px;font-size:0.85rem" onclick="toggleFilters()">
+          🎛️ فلترة وترتيب
+        </button>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div id="filterBar" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;align-items:end">
+          <div>
+            <div class="form-label">ترتيب حسب</div>
+            <select class="form-input" id="sortSelect" onchange="applyFilters()">
+              <option value="">الأحدث</option>
+              <option value="price_asc">السعر: الأرخص أولاً</option>
+              <option value="price_desc">السعر: الأغلى أولاً</option>
+              <option value="name_asc">الاسم: أ - ي</option>
+            </select>
+          </div>
+          <div>
+            <div class="form-label">السعر من (جنيه)</div>
+            <input class="form-input" type="number" id="priceMin" placeholder="0" min="0" oninput="applyFilters()">
+          </div>
+          <div>
+            <div class="form-label">السعر إلى (جنيه)</div>
+            <input class="form-input" type="number" id="priceMax" placeholder="بدون حد" min="0" oninput="applyFilters()">
+          </div>
+          <div>
+            <button class="btn btn-outline" style="width:100%;justify-content:center" onclick="resetFilters()">
+              🔄 إعادة تعيين
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <div class="spinner"></div>
+    </div>
+    <div id="productsPagination" style="overflow-anchor:auto"></div>
+  </div>
+</section>
+
+<!-- PAYMENT -->
+<section class="section" id="payment" style="background:var(--bg-secondary)">
+  <div class="container">
+    <h2 class="section-title">طرق الدفع</h2>
+    <p class="section-subtitle">ادفع بالطريقة الأنسب لك</p>
+    <div class="payment-grid" id="paymentGrid">
+      <!-- Rendered by JS -->
+    </div>
+    <div style="margin-top:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:1.3rem">📋</span>
+      <div>
+        <div style="font-weight:700;margin-bottom:2px;font-size:0.9rem">كيفية الطلب</div>
+        <div style="color:var(--text-secondary);font-size:0.82rem">اختر منتجك → أضف للسلة → أكمل الطلب → استلم المنتج</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="container">
+    <h2 class="section-title">تواصل معنا</h2>
+    <p class="section-subtitle">نحن هنا للمساعدة دائماً</p>
+    <div class="contact-grid">
+      <div class="contact-items">
+        <a class="contact-item" id="contactPhoneItem" href="#">
+          <div class="contact-item-icon" style="background:rgba(45,107,228,0.1);color:var(--accent-blue-light)">📞</div>
+          <div class="contact-item-text">
+            <div class="contact-item-label">رقم الهاتف</div>
+            <div class="contact-item-value" id="contactPhone">—</div>
+          </div>
+        </a>
+        <a class="contact-item whatsapp-btn" href="#" target="_blank" style="background:rgba(37,211,102,0.06);border-color:rgba(37,211,102,0.2)">
+          <div class="contact-item-icon" style="background:rgba(37,211,102,0.1);color:#25d366">💬</div>
+          <div class="contact-item-text">
+            <div class="contact-item-label">واتساب</div>
+            <div class="contact-item-value">راسلنا الآن</div>
+          </div>
+        </a>
+        <a class="contact-item" href="#" id="contactEmailItem">
+          <div class="contact-item-icon" style="background:rgba(249,168,212,0.1);color:var(--accent-gold)">📧</div>
+          <div class="contact-item-text">
+            <div class="contact-item-label">البريد الإلكتروني</div>
+            <div class="contact-item-value" id="contactEmail">—</div>
+          </div>
+        </a>
+        <div class="contact-item">
+          <div class="contact-item-icon" style="background:rgba(231,76,60,0.1);color:var(--danger)">📍</div>
+          <div class="contact-item-text">
+            <div class="contact-item-label">العنوان</div>
+            <div class="contact-item-value" id="contactAddress">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="margin-bottom:24px">
+          <div style="font-size:1.1rem;font-weight:800;margin-bottom:16px">تابعنا على</div>
+          <div class="social-links">
+            <a class="social-link" id="socialFacebook" href="#" target="_blank" style="display:none" title="فيسبوك">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </a>
+            <a class="social-link" id="socialInstagram" href="#" target="_blank" style="display:none" title="إنستغرام">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+            <a class="social-link" id="socialTiktok" href="#" target="_blank" style="display:none" title="تيك توك">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px">
+          <div style="font-size:1.05rem;font-weight:800;margin-bottom:8px">ساعات العمل</div>
+          <div style="color:var(--text-secondary);font-size:0.9rem;line-height:2">
+            📅 السبت - الخميس<br>
+            🕘 9:00 صباحاً - 10:00 مساءً<br>
+            <span style="color:var(--accent-gold)">✅ متاح للطلبات على واتساب 24/7</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px">
+      <div class="navbar-logo" style="font-size:1.3rem">🛒 <span class="site-name">متجرنا</span></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <a href="#categories" style="color:var(--text-secondary);font-size:0.9rem">الأقسام</a>
+        <a href="#products" style="color:var(--text-secondary);font-size:0.9rem">المنتجات</a>
+        <a href="#payment" style="color:var(--text-secondary);font-size:0.9rem">طرق الدفع</a>
+        <a href="#contact" style="color:var(--text-secondary);font-size:0.9rem">تواصل معنا</a>
+        <a href="/dashboard.html" style="color:var(--text-muted);font-size:0.85rem">لوحة التحكم</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span id="footerText">جميع الحقوق محفوظة © 2025 متجرنا</span>
+    </div>
+  </div>
+</footer>
+
+
+<!-- PRODUCT DETAIL MODAL -->
+<div class="product-detail-overlay" id="productDetailOverlay">
+  <div class="product-detail-modal">
+    <div class="product-detail-header">
+      <button class="modal-close" onclick="closeProductDetail()">✕</button>
+    </div>
+    <div class="product-detail-body" id="productDetailBody"></div>
+  </div>
+</div>
+
+<!-- CART FAB -->
+<button class="cart-fab" onclick="openCart()">
+  🛒
+  <span class="cart-badge" id="cartBadge">0</span>
+</button>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+<!-- CART PANEL -->
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-panel-header">
+    <div class="cart-panel-title">🛒 سلة المشتريات</div>
+    <button class="cart-panel-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total-row">
+      <span class="cart-total-label">الإجمالي</span>
+      <span class="cart-total-value" id="cartTotalAmount">0 جنيه</span>
+    </div>
+    <button class="checkout-btn" onclick="openCheckout()">💳 إتمام الشراء</button>
+    <button class="clear-cart-btn" onclick="clearCart()">🗑️ تفريغ السلة</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💳 إتمام الشراء</div>
+      <button class="modal-close" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="modal-body" id="checkoutContent"></div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/home.js?v=2"></script>
+
+<script>
+/* ===== MOBILE MENU ===== */
+function toggleMobileMenu() {
+  const panel = document.getElementById('mobileMenuPanel');
+  const overlay = document.getElementById('mobileMenuOverlay');
+  const burger = document.getElementById('navHamburger');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) {
+    closeMobileMenu();
+  } else {
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    burger.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeMobileMenu() {
+  document.getElementById('mobileMenuPanel').classList.remove('open');
+  document.getElementById('mobileMenuOverlay').classList.remove('open');
+  document.getElementById('navHamburger').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>
