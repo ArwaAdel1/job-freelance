@@ -6,6 +6,6 @@
     "dev": "cd backend && npm run dev",
     "start": "cd backend && npm start",
     "seed": "cd backend && npm run seed",
-    "install": "cd backend && npm install"
+    "vercel-build": "cd backend && npm ci"
   }
 }

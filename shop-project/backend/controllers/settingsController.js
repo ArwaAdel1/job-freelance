@@ -1,4 +1,7 @@
 const SiteSettings = require("../models/SiteSettings");
+const { uploadToCloudinary } = require("../middleware/upload");
+
+const SETTINGS_FOLDER = "shop/settings";
 
 const getSettings = async (req, res) => {
   try {
@@ -48,7 +51,7 @@ const updateSettings = async (req, res) => {
 const uploadSettingsIcon = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "لم يتم رفع أي صورة" });
-    const url = `/uploads/settings/icons/${req.file.filename}`;
+    const url = await uploadToCloudinary(req.file.buffer, SETTINGS_FOLDER);
     res.json({ url });
   } catch (err) {
     res.status(400).json({ message: err.message });

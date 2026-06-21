@@ -1,4 +1,7 @@
 const Category = require("../models/Category");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../middleware/upload");
+
+const CATEGORIES_FOLDER = "shop/categories";
 
 function slugify(text) {
   const arabicToLatin = {
@@ -59,7 +62,7 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const data = { ...req.body };
-    delete data.slug; // Don't change slug on update
+    delete data.slug;
     const category = await Category.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
     if (!category) return res.status(404).json({ message: "القسم مش موجود" });
     res.json(category);
@@ -77,6 +80,9 @@ const deleteCategory = async (req, res) => {
     }
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) return res.status(404).json({ message: "القسم مش موجود" });
+    if (category.icon) {
+      await deleteFromCloudinary(category.icon);
+    }
     res.json({ message: "تم حذف القسم" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -89,7 +95,7 @@ const uploadCategoryIcon = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "من فضلك اختر صورة" });
     }
-    const url = "/uploads/categories/icons/" + req.file.filename;
+    const url = await uploadToCloudinary(req.file.buffer, CATEGORIES_FOLDER);
     res.json({ url });
   } catch (err) {
     res.status(500).json({ message: err.message });
