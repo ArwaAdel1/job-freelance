@@ -1,52 +1,57 @@
 const multer = require("multer");
-const cloudinary = require("../config/cloudinary");
+const path = require("path");
+const fs = require("fs");
 
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "uploads/products";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
 
 const fileFilter = (req, file, cb) => {
+  const allowedExt = /\.(jpeg|jpg|png|webp|gif)$/i;
   const allowedMime = /^image\//;
-  if (allowedMime.test(file.mimetype)) {
+  if (allowedExt.test(file.originalname) || allowedMime.test(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error("صور فقط مسموح بها (jpeg, jpg, png, webp)"));
   }
 };
 
-const limits = { fileSize: 5 * 1024 * 1024 };
+const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
-const upload = multer({ storage, fileFilter, limits });
-const settingsUpload = multer({ storage, fileFilter, limits });
-const categoryUpload = multer({ storage, fileFilter, limits });
+const settingsStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "uploads/settings/icons";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
 
-function extractPublicId(url) {
-  if (!url || typeof url !== "string") return null;
-  const parts = url.split("/");
-  const versionIndex = parts.findIndex((p) => p.startsWith("v") && /^\d+$/.test(p.slice(1)));
-  if (versionIndex === -1 || versionIndex >= parts.length - 1) return null;
-  return parts.slice(versionIndex + 1).join("/").replace(/\.[^.]+$/, "");
-}
+const settingsUpload = multer({ storage: settingsStorage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
-async function uploadToCloudinary(buffer, folder) {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "image" },
-      (err, result) => {
-        if (err) reject(err);
-        else resolve(result.secure_url);
-      }
-    );
-    stream.end(buffer);
-  });
-}
+const categoryStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "uploads/categories/icons";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
 
-async function deleteFromCloudinary(url) {
-  const publicId = extractPublicId(url);
-  if (!publicId) return;
-  try {
-    await cloudinary.uploader.destroy(publicId);
-  } catch (err) {
-    console.error("Failed to delete from Cloudinary:", publicId, err.message);
-  }
-}
+const categoryUpload = multer({ storage: categoryStorage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
-module.exports = { upload, settingsUpload, categoryUpload, uploadToCloudinary, deleteFromCloudinary };
+module.exports = { upload, settingsUpload, categoryUpload };

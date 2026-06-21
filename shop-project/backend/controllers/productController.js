@@ -1,7 +1,4 @@
 const Product = require("../models/Product");
-const { uploadToCloudinary, deleteFromCloudinary } = require("../middleware/upload");
-
-const PRODUCTS_FOLDER = "shop/products";
 
 // GET /api/products
 const getProducts = async (req, res) => {
@@ -19,9 +16,11 @@ const getProducts = async (req, res) => {
       ];
     }
 
+    // Price filter
     if (priceMin) query.price = { ...query.price, $gte: Number(priceMin) };
     if (priceMax) query.price = { ...query.price, $lte: Number(priceMax) };
 
+    // Sort - default: oldest first (new products at end)
     let sortObj = { createdAt: 1 };
     if (sortBy) sortObj = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
 
@@ -54,17 +53,11 @@ const getProduct = async (req, res) => {
 // POST /api/products
 const createProduct = async (req, res) => {
   try {
+    const images = req.files ? req.files.map((f) => `/uploads/products/${f.filename}`) : [];
     const data = { ...req.body };
     if ("isActive" in data) data.isActive = data.isActive === "true" || data.isActive === true;
     if (data.subcategory === "" || data.subcategory === "null") delete data.subcategory;
-
-    if (req.files && req.files.length > 0) {
-      const uploads = req.files.map((f) => uploadToCloudinary(f.buffer, PRODUCTS_FOLDER));
-      data.images = await Promise.all(uploads);
-    } else {
-      data.images = [];
-    }
-
+    data.images = images;
     const product = await Product.create(data);
     res.status(201).json(product);
   } catch (err) {
@@ -78,17 +71,8 @@ const updateProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "المنتج مش موجود" });
 
+    const newImages = req.files ? req.files.map((f) => `/uploads/products/${f.filename}`) : [];
     const keepImages = req.body.keepImages ? JSON.parse(req.body.keepImages) : product.images;
-
-    const oldImages = product.images || [];
-    const removed = oldImages.filter((url) => !keepImages.includes(url));
-    await Promise.all(removed.map((url) => deleteFromCloudinary(url)));
-
-    let newImages = [];
-    if (req.files && req.files.length > 0) {
-      const uploads = req.files.map((f) => uploadToCloudinary(f.buffer, PRODUCTS_FOLDER));
-      newImages = await Promise.all(uploads);
-    }
 
     const data = { ...req.body };
     if ("isActive" in data) data.isActive = data.isActive === "true" || data.isActive === true;
@@ -108,9 +92,6 @@ const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ message: "المنتج مش موجود" });
-    if (product.images && product.images.length > 0) {
-      await Promise.all(product.images.map((url) => deleteFromCloudinary(url)));
-    }
     res.json({ message: "تم حذف المنتج" });
   } catch (err) {
     res.status(500).json({ message: err.message });
